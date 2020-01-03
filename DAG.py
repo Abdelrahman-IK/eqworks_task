@@ -2,6 +2,11 @@
 class DAG:
 
     def __init__(self):
+        """
+        Init function loads relation.txt as relations between tasks.
+        loads tasks_ids.txt as each task's id.
+        loads question.txt as the start task and goal task.
+        """
         try:
             self.relations = open("DAG_data/relations.txt", "r").read().replace('->', ',')
             self.relations = [tuple(i.split(',')) for i in self.relations.split('\n')]
@@ -14,6 +19,11 @@ class DAG:
             print(str(ex))
 
     def sorting(self):
+        """
+        Sorting function finds the correct topological ordering of the DAG
+        based on the start task and goal task.
+        :return: List of ordered tasks
+        """
         try:
             for i in self.path:
                 for x in self.relations:
