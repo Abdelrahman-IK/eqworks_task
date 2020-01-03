@@ -5,15 +5,26 @@ from pathlib import Path
 
 class Analysis:
 
-    def __init__(self):
+    def __init__(self, rdf, pdf):
         print('Reading dataset...')
-        self.frame = pd.read_csv('data/DataSample.csv')
-        print('Dataset loaded, Sample:')
-        print(self.frame.head())
-        print('Loading POI dataset...')
-        self.poi = pd.read_csv('data/POIList.csv')
-        self.sep = '################'
-        print(self.sep)
+        try:
+            self.frame = pd.read_csv('data/'+rdf)
+            print('Dataset loaded, Sample:')
+            print(self.frame.head())
+            print('Loading POI dataset...')
+            self.poi = pd.read_csv('data/'+pdf)
+            self.sep = '################'
+            print(self.sep)
+        except Exception as ex:
+            print(str(ex))
+            print("Loading default datasets")
+            self.frame = pd.read_csv('data/DataSample.csv')
+            print('Dataset loaded, Sample:')
+            print(self.frame.head())
+            print('Loading POI dataset...')
+            self.poi = pd.read_csv('data/POIList.csv')
+            self.sep = '################'
+            print(self.sep)
 
     def cleaning(self):
         print('1- Cleanup Stage: ')
@@ -60,21 +71,32 @@ class Analysis:
         print('Analysis sample 1: ')
         print(self.poi.head())
         print('Calculating circle radius for POIs...')
-        self.poi['Circle_radius_km'] = self.poi['POIID'].apply(lambda x:self.frame[self.frame['POI']==x]['Distance'].max())
+        self.poi['Circle_radius_km'] = self.poi['POIID'].apply(lambda x: self.frame[self.frame['POI']==x]['Distance'].max())
         print('Calculating denisty for POIs...')
-        self.poi['Density'] = self.poi['POIID'].apply(lambda x:self.frame[self.frame['POI']==x]['Distance'].count())/(3.14*(self.poi['Circle_radius_km'])**2)
+        self.poi['Density'] = self.poi['POIID'].apply(lambda x: self.frame[self.frame['POI']==x]['Distance'].count())/(3.14*(self.poi['Circle_radius_km'])**2)
         print('Analysis sample 2: ')
         print(self.poi.head())
 
     def exporting_dfs(self):
+        print('Saving results...')
         Path("results").mkdir(parents=True, exist_ok=True)
         self.frame.to_csv('results/analysis_results.csv', index=False)
         self.poi.to_csv('results/POIList.csv', index=False)
 
 
 if __name__ == '__main__':
-    analysis = Analysis()
-    analysis.cleaning()
-    analysis.labeling()
-    analysis.analyzing()
-    analysis.exporting_dfs()
+    try:
+        requests = input("Please enter requests dataframe's name: ")
+        poi = input("Please enter POIs dataframe's name: ")
+        ext = ".csv"
+        if ext not in requests:
+            requests = requests + ext
+        if ext not in poi:
+            poi = poi + ext
+        analysis = Analysis(requests, poi)
+        analysis.cleaning()
+        analysis.labeling()
+        analysis.analyzing()
+        analysis.exporting_dfs()
+    except Exception as ex:
+        print(str(ex))
